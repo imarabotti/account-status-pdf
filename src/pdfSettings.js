@@ -6,7 +6,7 @@ module.exports.pdfSettings = {
     printBackground: true,
     displayHeaderFooter: true,
     margin: {
-        top: '30px',
+        top: '40px',
         bottom: '30px',
         right: '30px',
         left: '60px',
