@@ -77,11 +77,9 @@ module.exports.handler = async (event, context) => {
 
     await s3.putObject(uploadedPdfParams).promise();
 
-    let MergeQueueUrl = "https://sqs.us-west-2.amazonaws.com/730404845529/prod_merge_expense_queue";
-
     let MergeQueueParams = {
       MessageBody: JSON.stringify(message),
-      QueueUrl: MergeQueueUrl,
+      QueueUrl: process.env['merge_expense_queue'],
       DelaySeconds: 0,
     };
 
