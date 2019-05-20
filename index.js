@@ -4,16 +4,12 @@ const AWS = require('aws-sdk');
 const fs = require('fs-extra');
 const { pdfSettings } = require('./src/pdfSettings');
 
-async function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 module.exports.handler = async (event, context) => {
   let result = null;
   let browser = null;
 
   const s3 = new AWS.S3();
-  const lambda = new AWS.Lambda({ apiVersion: '2015-03-31', region: 'us-west-2' });
   
   const bucket = event.Bucket;
   const jsonPath = decodeURIComponent(event.Key.replace(/\+/g, " "));
@@ -49,8 +45,6 @@ module.exports.handler = async (event, context) => {
       waitUntil: 'networkidle0'
     });
 
-    await timeout(4000);
-
     await page.evaluate(() => { window.scrollBy(0, window.innerHeight); });
 
     await page.waitFor('*');
@@ -78,20 +72,8 @@ module.exports.handler = async (event, context) => {
     };
 
     await s3.putObject(uploadedPdfParams).promise();
-
-    let params = {
-        FunctionName: process.env['merge_expense_lambda'], 
-        InvocationType: "Event", 
-        LogType: "Tail",
-        Payload: Buffer.from(JSON.stringify(event), 'utf8'),
-    };
-
-    await lambda.invoke(params).promise();
-
-    // Dejo el console.log para que quede registro en CloudWatch
-    console.log(ruta_prorrateo);
     
-    result = ruta_prorrateo;
+    result = { ruta_prorrateo };
 
     // Fin de la funcion
 
@@ -103,5 +85,5 @@ module.exports.handler = async (event, context) => {
     }
   }
 
-  return context.succeed(result);
+  return Object.assign(event, result);
 };
